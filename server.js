@@ -71,6 +71,60 @@ app.delete('/todos/:id', function(req, res){
 
 })
 
+app.put('/todos/:id', function(req, res){
+    var todoid = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoid});
+
+    if(!matchedTodo) {
+        return res.status(404).json({"error":"No task found with given id"});
+    }
+    
+    var body = _.pick(req.body, 'description', 'completed');
+
+    var validAttritubes = {};
+
+    if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+        validAttritubes.completed = body.completed;
+    } else if (body.hasOwnProperty('completed')){
+        return res.status(400).send();
+    }
+
+    if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0){
+        body.description = body.description.trim();
+        validAttritubes.description = body.description;
+    } else if (body.hasOwnProperty('description')) {
+        return res.status(400).send();
+    }
+
+    _.extend(matchedTodo, body);
+
+    res.json(todos)
+
+})
+
+
+// app.put('/todos/:id', function(req, res){
+//     var todoid = parseInt(req.params.id, 10);
+    
+//     var body = _.pick(req.body, 'description', 'completed');
+//     var validAttritubes = {};
+
+//     if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+//         validAttritubes.completed = body.completed;
+//     } else if (body.hasOwnProperty('completed')){
+//         return res.status(400).send();
+//     }
+
+//     if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0){
+//         validAttritubes.description = body.description;
+//     } else if (body.hasOwnProperty('description')) {
+//         return res.status(400).send();
+//     }
+
+//     res.json(body);
+
+// })
+
 app.listen(PORT, function(){
     console.log('Express listening on port: ' + PORT + '!!');
 })

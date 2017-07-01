@@ -23,6 +23,13 @@ app.get('/todos', function(req, res){
     } else if (queryParams.hasOwnProperty("completed") && queryParams.completed === "false"){
         filteredTodos = _.where(filteredTodos, {completed: false});
     }
+
+    if (queryParams.hasOwnProperty("q") && _.isString(queryParams.q)){
+        filteredTodos = _.filter(filteredTodos, function(filteredTodo){
+            // var todoDescription = filteredTodo.description;
+            return filteredTodo.description.toLowercase.indexOf(queryParams.q.toLowercase) > -1;
+        })
+    }
     res.json(filteredTodos);
 })
 

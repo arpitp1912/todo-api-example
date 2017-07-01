@@ -1,5 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');    
+var _ = require("underscore");
+
 var app = express();
 var PORT = process.env.PORT || 3000;
 var todos = []
@@ -19,14 +21,9 @@ app.get('/todos', function(req, res){
 //Get individual task
 app.get('/todos/:id', function(req, res){
     var todoid = Number(req.params.id);
-    var matchedTodo;
-    // res.send(typeof todos[0].id);
-    
-    for (i = 0; i < todos.length; i++){
-        if (todoid === todos[i].id){
-            matchedTodo = todos[i]
-        }
-    }
+
+    //Find the todo item
+    var matchedTodo = _.findWhere(todos, {id: todoid});
 
     if (matchedTodo){
         res.json(matchedTodo);
@@ -38,18 +35,18 @@ app.get('/todos/:id', function(req, res){
 })
 
 app.post('/todos', function(req, res){
-    var body = req.body;
-    // var addTodoItem = {};
+    var body = _.pick(req.body, 'description', 'completed');
 
-    // addTodoItem.id = nextTodoID;
-    // addTodoItem.description = body.description;
-    // addTodoItem.completed = body.completed
+    if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
+        res.status(400).send();
+    }
 
-    body.id = nextTodoID;
+    body.description = body.description.trim();
+
+    body.id = nextTodoID++; //Set incremented Todo ID and update value of Todo ID.
 
     todos.push(body)
 
-    nextTodoID++
     console.log("Task added: " + body.description);
 
     res.json(todos);

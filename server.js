@@ -68,19 +68,35 @@ app.post('/todos', function(req, res){
 app.delete('/todos/:id', function(req, res){
     var todoid = parseInt(req.params.id, 10);
     
-    var matchedTodo = _.findWhere(todos, {id: todoid});
+    // var matchedTodo = _.findWhere(todos, {id: todoid});
 
-    if(!matchedTodo) {
-        return res.status(404).json({"error":"No task found with given id"});
-    }
+    // if(!matchedTodo) {
+    //     return res.status(404).json({"error":"No task found with given id"});
+    // }
 
-    console.log("Removing Task: " + matchedTodo.description)
+    // console.log("Removing Task: " + matchedTodo.description)
 
-    todos = _.without(todos, matchedTodo);
+    // todos = _.without(todos, matchedTodo);
 
-    console.log("Removed Task: " + matchedTodo.description);
+    // console.log("Removed Task: " + matchedTodo.description);
 
-    res.json(todos);
+    // res.json(todos);
+
+    db.todo.destroy({
+        where: {
+            id: todoid
+        }
+    }).then(function(rowsDeleted){
+        if (rowsDeleted === 0){
+                res.status(404).json({
+                    "error": "Unable to find task with ID"
+                });
+        } else {
+            res.status(204).send();
+        }
+    }, function(e){
+        res.status(500).send();
+    });
 
 })
 

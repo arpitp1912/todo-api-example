@@ -5,7 +5,7 @@ var db = require('./db.js');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
-var todos = []
+var todos = []completed=todo
 var nextTodoID = 1;
 
 app.use(bodyParser.json());
@@ -16,22 +16,26 @@ app.get('/', function(req, res){
 
 //Get all tasks
 app.get('/todos', function(req, res){
-    var queryParams = req.query;
-    var filteredTodos = todos;
+    var query = req.query;
+    var where = {};
 
-    if (queryParams.hasOwnProperty("completed") && queryParams.completed === "true"){
-        filteredTodos = _.where(filteredTodos, {completed: true});
-    } else if (queryParams.hasOwnProperty("completed") && queryParams.completed === "false"){
-        filteredTodos = _.where(filteredTodos, {completed: false});
+    if (query.hasOwnProperty("completed") && query.completed === "true"){
+        where.completed = true;
+    } else if (query.hasOwnProperty("completed") && query.completed === "false"){
+        where.completed = false;
+    } 
+
+    if (query.hasOwnProperty("q") && query.q.trim().length > 0){
+        where.description = {
+            $like : '%' + query.q + '%' 
+        };
     }
 
-    if (queryParams.hasOwnProperty("q") && _.isString(queryParams.q)){
-        filteredTodos = _.filter(filteredTodos, function(filteredTodo){
-            // var todoDescription = filteredTodo.description;
-            return filteredTodo.description.toLowercase.indexOf(queryParams.q.toLowercase) > -1;
-        })
-    }
-    res.json(filteredTodos);
+    db.todo.findAll({where: where}).then(function(todos){
+        res.json(todos);
+    }, function(e){
+        res.status(500).send();
+    });
 })
 
 //Get individual task
@@ -43,21 +47,12 @@ app.get('/todos/:id', function(req, res){
        if(!!todo){
         res.json(todo.toJSON());
        }else {
-        res.status(500).send("Task not found!");
-       }
-       
+        res.status(404).send();
+       }   
+   }, function(e){
+       res.status(500).send();
    })
 
-    
-    // var matchedTodo = _.findWhere(todos, {id: todoid});
-
-    // if (matchedTodo){
-    //     res.json(matchedTodo);
-    // } else{
-    //     res.status(404).send(); //Send 404 - Page not found message to user if ID is incorrect.
-    // } 
-
-    // res.send("Asking for todo with id: " + req.params.id); // Use res.send to display message on screen
 })
 
 app.post('/todos', function(req, res){

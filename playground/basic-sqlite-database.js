@@ -8,8 +8,9 @@ var Todo = sequelize.define('todo', {
     description: {
         type: Sequelize.STRING,
         allowNull: false,
-        validare: {
-            len: [1,256]
+        validate: {
+            len: [1,256],
+            notNull: true
         }
     },
     completed: {

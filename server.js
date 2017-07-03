@@ -39,13 +39,23 @@ app.get('/todos/:id', function(req, res){
     var todoid = Number(req.params.id);
 
     //Find the todo item
-    var matchedTodo = _.findWhere(todos, {id: todoid});
+    db.todo.findById(todoid).then(function(todo){
+       if(!!todo){
+        res.json(todo.toJSON());
+       }else {
+        res.status(500).send("Task not found!");
+       }
+       
+   })
 
-    if (matchedTodo){
-        res.json(matchedTodo);
-    } else{
-        res.status(404).send(); //Send 404 - Page not found message to user if ID is incorrect.
-    } 
+    
+    // var matchedTodo = _.findWhere(todos, {id: todoid});
+
+    // if (matchedTodo){
+    //     res.json(matchedTodo);
+    // } else{
+    //     res.status(404).send(); //Send 404 - Page not found message to user if ID is incorrect.
+    // } 
 
     // res.send("Asking for todo with id: " + req.params.id); // Use res.send to display message on screen
 })
@@ -58,20 +68,6 @@ app.post('/todos', function(req, res){
     }).catch(function(e){
         res.status(400).json(e);
     })
-
-    // if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
-    //     return res.status(400).send();
-    // }
-
-    // body.description = body.description.trim();
-
-    // body.id = nextTodoID++; //Set incremented Todo ID and update value of Todo ID.
-
-    // todos.push(body)
-
-    // console.log("Task added: " + body.description);
-
-    // res.json(todos);
 })
 
 app.delete('/todos/:id', function(req, res){
